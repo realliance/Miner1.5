@@ -112,7 +112,7 @@ bool BlockManager::Verify(PlacedBlock* block) {
 }
 
 bool BlockManager::Place(PlacedBlock *block) {
-    if (VerifyBlockInRegister(block->id)) {
+    if (Verify(block)) {
         placedBlocks.push_back(*block);
         return true;
     } else {
@@ -121,8 +121,8 @@ bool BlockManager::Place(PlacedBlock *block) {
 }
 
 bool BlockManager::Place(std::vector<PlacedBlock> blockVector) {
-    for(auto const block : blockVector) {
-        if (VerifyBlockInRegister(block.id)) {
+    for(auto block : blockVector) {
+        if (Verify(&block)) {
             placedBlocks.push_back(block);
         } else {
             return false;
