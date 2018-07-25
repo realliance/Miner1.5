@@ -5,6 +5,7 @@ if(NOT MSVC)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${example_SOURCE_DIR})
 endif()
 
+link_directories(${GLFW_LIBDIR})
 add_subdirectory(libraries)
 add_executable(example "")
 add_subdirectory(src)

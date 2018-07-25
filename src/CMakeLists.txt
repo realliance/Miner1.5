@@ -8,4 +8,3 @@ target_sources(example
 )
 target_include_directories(example PRIVATE "${example_SOURCE_DIR}/include")
 target_include_directories(example PRIVATE "${madd_SOURCE_DIR}/include/engine")
-MESSAGE(STATUS "${example_SOURCE_DIR}/include/game")
