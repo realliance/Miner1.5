@@ -6,6 +6,8 @@
 #include "block.h"
 #include <vector>
 #include <glm/glm.hpp>
+#include <unordered_map>
+
 class Madd;
 class BlockManager : public GameObject{
     public:
@@ -24,10 +26,13 @@ class BlockManager : public GameObject{
         RenderedObject* cubeMesh;
         std::vector<PlacedBlock> placedBlocks;
         std::vector<Block> blocks;
+        std::vector<float> vertices;
         Madd* context;
         bool Verify(PlacedBlock *block);
         bool VerifyBlockInRegister(int id);
         bool VerifyBlockUniquePosition(PlacedBlock *block);
+        std::unordered_map<unsigned, int> textureMap;
+
 };
 
 #endif //BLOCKMANAGER_H

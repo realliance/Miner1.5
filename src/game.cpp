@@ -17,9 +17,9 @@ Game::Game(){
 
     //Init Blocks
     BlockManager* Manager = new BlockManager(Engine);
-    Manager->Register(new Block("Air", ""));
-    Manager->Register(new Block("Stone", "stone.jpg"));
-    Manager->Register(new Block("Lobby Stone", "lobby.jpg"));
+    Manager->Register(new Block("Air", "", false));
+    Manager->Register(new Block("Stone", "stone.jpg", true));
+    Manager->Register(new Block("Lobby Stone", "lobbystone.jpg", true));
 
     Engine->AddObject(Manager);
 

@@ -8,7 +8,7 @@
 #include <string>
 
 BlockManager::BlockManager(Madd* context):context(context){
-    std::vector<float> vertices = {
+    vertices = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
          0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -57,7 +57,6 @@ BlockManager::BlockManager(Madd* context):context(context){
     blocks = {};
 
     cubeMesh = new RenderedObject(this);
-    cubeMesh->RenderInit(vertices,"default.vs","default.fs","stone.jpg");
 }
 
 BlockManager::~BlockManager(){
@@ -68,6 +67,13 @@ unsigned BlockManager::Register(Block *block) {
   int id = blocks.size();
   block->id = id;
   blocks.push_back(*block);
+  if (block->rendered) {
+    if (textureMap.size() == 0) {
+        textureMap.insert(std::make_pair<unsigned, int>(id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)));
+    } else {
+        textureMap.insert(std::make_pair<unsigned, int>(id, cubeMesh->AddTexture(block->materialPath)));
+    }
+  }
   return id;
 }
 
@@ -136,6 +142,11 @@ bool BlockManager::Place(std::vector<PlacedBlock> blockVector) {
 bool BlockManager::Render() {
     int i = 0;
     for(auto const block : placedBlocks) {
+        Block blockObj = GetBlock(block.id);
+        if (blockObj.rendered) {
+            cubeMesh->SetTexture(textureMap[block.id]);
+        }
+        cubeMesh->Rendered(blockObj.rendered);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, block.position);
         cubeMesh->SetTransformation(model);
@@ -147,7 +158,8 @@ bool BlockManager::Render() {
 }
 
 bool BlockManager::ReloadShaders(){
-    return cubeMesh->LoadShader();
+    cubeMesh->LoadShader();
+    return true;
 }
 
 bool BlockManager::Update(){

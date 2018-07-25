@@ -3,9 +3,10 @@
 #include <string>
 
 struct Block {
-        Block(std::string n, std::string mP):name(n),materialPath(mP){}
+        Block(std::string n, std::string mP, bool ren):name(n),materialPath(mP),rendered(ren){}
         std::string name;
         std::string materialPath;
+        bool rendered;
         int id;
 };
 
