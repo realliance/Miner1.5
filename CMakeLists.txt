@@ -5,6 +5,10 @@ if(NOT MSVC)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${miner1.5_SOURCE_DIR})
 endif()
 
+set(GLFW_BUILD_EXAMPLES FALSE)
+set(GLFW_BUILD_TESTS FALSE)
+set(GLFW_BUILD_DOCS FALSE)
+
 link_directories(${GLFW_LIBDIR})
 add_subdirectory(libraries)
 add_executable(miner1.5 "")
