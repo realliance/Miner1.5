@@ -1,4 +1,5 @@
-# Madd Engine Example Game
+# Miner1.5
+## Created with the Madd Engine
 
 This is a game that is being built along with the Madd engine.
 
