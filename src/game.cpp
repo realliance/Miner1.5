@@ -54,7 +54,7 @@ std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingC
 }
 
 void Game::LoadLobby(BlockManager* Manager) {
-    //unsigned airID = Manager->GetBlock("Air").id;
+    unsigned airID = Manager->GetBlock("Air").id;
     unsigned stoneID = Manager->GetBlock("Stone").id;
     unsigned lobbyStoneID = Manager->GetBlock("Lobby Stone").id;
 
@@ -82,4 +82,7 @@ void Game::LoadLobby(BlockManager* Manager) {
 
     // Right Wall
     Manager->Place(Build(glm::vec3(6.0f, 1.0f, -5.0f), glm::vec3(6.0f, 1.0f, 5.0f), stoneID));
+
+    // Fill Room With Air
+    Manager->Place(Build(glm::vec3(-5.0f, 1.0f, -5.0f), glm::vec3(5.0f, 1.0f, 5.0f), airID));
 }

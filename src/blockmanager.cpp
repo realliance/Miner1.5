@@ -98,6 +98,19 @@ bool BlockManager::VerifyBlockInRegister(int id) {
     }
 }
 
+bool BlockManager::VerifyBlockUniquePosition(PlacedBlock* block) {
+    for (unsigned i = 0; i < placedBlocks.size(); i++) {
+        if (glm::all(glm::equal(placedBlocks[i].position, block->position))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool BlockManager::Verify(PlacedBlock* block) {
+    return VerifyBlockInRegister(block->id) && VerifyBlockUniquePosition(block);
+}
+
 bool BlockManager::Place(PlacedBlock *block) {
     if (VerifyBlockInRegister(block->id)) {
         placedBlocks.push_back(*block);

@@ -25,7 +25,9 @@ class BlockManager : public GameObject{
         std::vector<PlacedBlock> placedBlocks;
         std::vector<Block> blocks;
         Madd* context;
+        bool Verify(PlacedBlock *block);
         bool VerifyBlockInRegister(int id);
+        bool VerifyBlockUniquePosition(PlacedBlock *block);
 };
 
 #endif //BLOCKMANAGER_H
