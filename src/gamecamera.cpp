@@ -5,7 +5,8 @@
 #include "eventhandler.h"
 GameCamera::GameCamera(Madd* context):context(context){
     cameraObj = new FreeCam(context);
-    context->SetMainCamera(cameraObj); 
+    cameraObj->MovePosition(glm::vec3(0.0f,1.0f,-3.0f));
+    context->SetMainCamera(cameraObj);
 }
 
 GameCamera::~GameCamera(){

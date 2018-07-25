@@ -6,6 +6,8 @@
 #include "block.h"
 
 #include <string>
+#include <cmath>
+#include "math.h"
 
 Game::Game(){
     const char *title = "Miner1.5";
@@ -19,10 +21,9 @@ Game::Game(){
     Manager->Register(new Block("Stone", "stone.jpg"));
     Manager->Register(new Block("Lobby Stone", "lobby.jpg"));
 
-    Manager->Place(new PlacedBlock(Manager->GetBlock("Air").id, glm::vec3( 1.0f,  0.0f,  0.0f)));
-    Manager->Place(new PlacedBlock(Manager->GetBlock("Lobby Stone").id, glm::vec3( 2.0f,  0.0f,  0.0f)));
-
     Engine->AddObject(Manager);
+
+    LoadLobby(Manager);
 }
 
 Game::~Game(){
@@ -33,4 +34,52 @@ void Game::Run(){
     while(Engine->StayOpen()){
         Engine->Tick();
     }
+}
+
+std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingCorner, unsigned blockID) {
+
+    int xDirection = copysign(1.0f, endingCorner.x - startingCorner.x);
+    int yDirection = copysign(1.0f, endingCorner.y - startingCorner.y);
+    int zDirection = copysign(1.0f, endingCorner.z - startingCorner.z);
+
+    std::vector<PlacedBlock> roof = {};
+    for (int x = startingCorner.x; x <= endingCorner.x; x += xDirection) {
+        for (int z = startingCorner.z; z <= endingCorner.z; z += zDirection) {
+            for (int y = startingCorner.y; y <= endingCorner.y; y += yDirection) {
+                roof.push_back({blockID, glm::vec3((float)x, (float)y, (float)z)});
+            }
+        }
+    }
+    return roof;
+}
+
+void Game::LoadLobby(BlockManager* Manager) {
+    //unsigned airID = Manager->GetBlock("Air").id;
+    unsigned stoneID = Manager->GetBlock("Stone").id;
+    unsigned lobbyStoneID = Manager->GetBlock("Lobby Stone").id;
+
+    // Roof
+    Manager->Place(Build(glm::vec3(-5.0f, 2.0f, -5.0f), glm::vec3(5.0f, 2.0f, 5.0f), stoneID));
+
+    // Floor with Lobby Center
+    Manager->Place(Build(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-2.0f, 0.0f, 5.0f), stoneID));
+
+    Manager->Place(Build(glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -2.0f), stoneID));
+    Manager->Place(Build(glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, 1.0f), lobbyStoneID));
+    Manager->Place(Build(glm::vec3(-1.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 5.0f), stoneID));
+
+
+    Manager->Place(Build(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, 5.0f), stoneID));
+
+    // Front Wall
+    Manager->Place(Build(glm::vec3(-5.0f, 1.0f, -6.0f), glm::vec3(5.0f, 1.0f, -6.0f), stoneID));
+
+    // Back Wall
+    Manager->Place(Build(glm::vec3(-5.0f, 1.0f, 6.0f), glm::vec3(5.0f, 1.0f, 6.0f), stoneID));
+
+    // Left Wall
+    Manager->Place(Build(glm::vec3(-6.0f, 1.0f, -5.0f), glm::vec3(-6.0f, 1.0f, 5.0f), stoneID));
+
+    // Right Wall
+    Manager->Place(Build(glm::vec3(6.0f, 1.0f, -5.0f), glm::vec3(6.0f, 1.0f, 5.0f), stoneID));
 }
