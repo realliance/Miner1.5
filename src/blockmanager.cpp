@@ -72,10 +72,10 @@ unsigned BlockManager::Register(Block *block) {
         if (textureMap.size() == 0) {
             textureMap.insert({id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)});
         } else {
-        textureMap.insert({id, cubeMesh->AddTexture(block->materialPath)});
+            textureMap.insert({id, cubeMesh->AddTexture(block->materialPath)});
+        }
     }
-  }
-  return id;
+    return id;
 }
 
 Block BlockManager::GetBlock(std::string name) {
