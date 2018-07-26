@@ -6,6 +6,7 @@
 #include "eventhandler.h"
 
 #include <string>
+#include <unordered_map>
 
 BlockManager::BlockManager(Madd* context):context(context){
     vertices = {
@@ -69,9 +70,9 @@ unsigned BlockManager::Register(Block *block) {
   blocks.push_back(*block);
   if (block->rendered) {
     if (textureMap.size() == 0) {
-        textureMap.insert(std::make_pair<unsigned, int>(id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)));
+        textureMap.insert({id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)});
     } else {
-        textureMap.insert(std::make_pair<unsigned, int>(id, cubeMesh->AddTexture(block->materialPath)));
+        textureMap.insert({id, cubeMesh->AddTexture(block->materialPath)});
     }
   }
   return id;
