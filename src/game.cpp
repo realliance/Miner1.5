@@ -20,6 +20,15 @@ Game::Game(){
     Manager->Register(new Block("Air", "", false));
     Manager->Register(new Block("Stone", "stone.jpg", true));
     Manager->Register(new Block("Lobby Stone", "lobbystone.jpg", true));
+    Manager->Register(new Block("Iron", "ironore.jpg", true));
+    Manager->Register(new Block("Copper", "copperore.jpg", true));
+    Manager->Register(new Block("Tin", "tinore.jpg", true));
+    Manager->Register(new Block("Gold", "goldore.jpg", true));
+    Manager->Register(new Block("Amethyst", "amethystore.jpg", true));
+    Manager->Register(new Block("Quartz", "ironore.jpg", true));
+    Manager->Register(new Block("Meteoric Iron", "meteorironore.jpg", true));
+    Manager->Register(new Block("Uranium", "uraniumore.jpg", true));
+
 
     Engine->AddObject(Manager);
 
