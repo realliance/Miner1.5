@@ -63,13 +63,13 @@ BlockManager::BlockManager(Madd* context):context(context){
 BlockManager::~BlockManager(){
     delete cubeMesh;
 }
-
+#include <iostream>
 unsigned BlockManager::Register(Block *block) {
   int id = blocks.size();
   block->id = id;
   blocks.push_back(*block);
   if (block->rendered) {
-    if (textureMap.size() == 0) {
+    if (textureMap.empty()) {
         textureMap.insert({id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)});
     } else {
         textureMap.insert({id, cubeMesh->AddTexture(block->materialPath)});
