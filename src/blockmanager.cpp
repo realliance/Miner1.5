@@ -65,13 +65,13 @@ BlockManager::~BlockManager(){
 }
 #include <iostream>
 unsigned BlockManager::Register(Block *block) {
-  int id = blocks.size();
-  block->id = id;
-  blocks.push_back(*block);
-  if (block->rendered) {
-    if (textureMap.empty()) {
-        textureMap.insert({id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)});
-    } else {
+    int id = blocks.size();
+    block->id = id;
+    blocks.push_back(*block);
+    if (block->rendered) {
+        if (textureMap.size() == 0) {
+            textureMap.insert({id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)});
+        } else {
         textureMap.insert({id, cubeMesh->AddTexture(block->materialPath)});
     }
   }
