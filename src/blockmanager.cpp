@@ -3,168 +3,135 @@
 #include "blockmanager.h"
 #include "placedblock.h"
 #include "madd.h"
-#include "eventhandler.h"
 
 #include <string>
 #include <unordered_map>
 
-BlockManager::BlockManager(Madd* context):context(context){
-    vertices = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+void BlockManager::Init(){
+    blockMesh = new MeshComponent{};
+    blockMesh->verts = {
+        {-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f}, { 0.5f,  0.5f, -0.5f},
+        { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f}, {-0.5f, -0.5f, -0.5f},
+        {-0.5f, -0.5f,  0.5f}, { 0.5f, -0.5f,  0.5f}, { 0.5f,  0.5f,  0.5f},
+        { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}, {-0.5f, -0.5f,  0.5f},
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        {-0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f, -0.5f}, {-0.5f, -0.5f, -0.5f},
+        {-0.5f, -0.5f, -0.5f}, {-0.5f, -0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f},
+        { 0.5f,  0.5f,  0.5f}, { 0.5f,  0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f},
+        { 0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f,  0.5f}, { 0.5f,  0.5f,  0.5f},
 
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        {-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f,  0.5f},
+        { 0.5f, -0.5f,  0.5f}, {-0.5f, -0.5f,  0.5f}, {-0.5f, -0.5f, -0.5f},
+        {-0.5f,  0.5f, -0.5f}, { 0.5f,  0.5f, -0.5f}, { 0.5f,  0.5f,  0.5f},
+        { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f, -0.5f}
+    };
+    blockMesh->texcoords = {
+    {0.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f},
+    {1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f},
+    {0.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f},
+    {1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f},
 
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    {1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f},
+    {0.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f},
+    {1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f},
+    {0.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f},
 
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    {0.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f},
+    {1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 1.0f},
+    {0.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f},
+    {1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 1.0f}
     };
 
-    placedBlocks = {};
+    blockShader->fragmentShaderPath = "default.fs";
+    blockShader->vertexShaderPath = "default.vs";
 
-    blocks = {};
+    meshSystem = dynamic_cast<MeshSystem*>(Madd::GetInstance().GetSystem("MeshSystem"));
+    renderSystem = dynamic_cast<RenderSystem*>(Madd::GetInstance().GetSystem("RenderSystem"));
+    textureSystem = dynamic_cast<TextureSystem*>(Madd::GetInstance().GetSystem("TextureSystem"));
+    shaderSystem = dynamic_cast<ShaderSystem*>(Madd::GetInstance().GetSystem("ShaderSystem"));
 
-    cubeMesh = new RenderedObject(this);
+    meshSystem->Register(blockMesh);
+    shaderSystem->Register(blockShader);
+
+    Block air{};
+    air.name = "Air";
+    blockRegister[Madd::GetInstance().GetNewComponentID()] = air;
 }
 
-BlockManager::~BlockManager(){
-    delete cubeMesh;
-}
-#include <iostream>
-unsigned BlockManager::Register(Block *block) {
-    int id = blocks.size();
-    block->id = id;
-    blocks.push_back(*block);
-    if (block->rendered) {
-        if (textureMap.size() == 0) {
-            textureMap.insert({id, cubeMesh->RenderInit(vertices, "default.vs", "default.fs", block->materialPath)});
-        } else {
-            textureMap.insert({id, cubeMesh->AddTexture(block->materialPath)});
-        }
+void BlockManager::Deinit(){
+    for(auto & [type, block] : blockRegister){
+        textureSystem->Unregister(block.material);
     }
-    return id;
+    blockRegister.clear();
+    nameIDMap.clear();
+    for(auto & [pos, placedBlock] : placedBlocks){
+        renderSystem->Unregister(placedBlockRenderedComponent[placedBlock.cID]);
+    }
+    placedBlocks.clear();
+    placedBlockRenderedComponent.clear();
+    delete blockMesh;
+    delete blockShader;
 }
 
-Block BlockManager::GetBlock(std::string name) {
-    for (unsigned i = 0; i < blocks.size(); i++) {
-        if (blocks[i].name.compare(name) == 0) {
-            return blocks[i];
-        }
-    }
-    throw "No Block Found with given name!";
-}
-
-Block BlockManager::GetBlock(unsigned id) {
-    for (unsigned i = 0; i < blocks.size(); i++) {
-        if (i == id) {
-            return blocks[i];
-        }
-    }
-    throw "No Block Found with given id!";
-}
-
-bool BlockManager::VerifyBlockInRegister(int id) {
-    try {
-        GetBlock(id);
-        return true;
-    } catch (const char* msg) {
-        return false;
-    }
-}
-
-bool BlockManager::VerifyBlockUniquePosition(PlacedBlock* block) {
-    for (unsigned i = 0; i < placedBlocks.size(); i++) {
-        if (glm::all(glm::equal(placedBlocks[i].position, block->position))) {
-            return false;
-        }
-    }
+bool BlockManager::Register(Component *b){
+    Block* block = dynamic_cast<Block*>(b);
+    block->cID = Madd::GetInstance().GetNewComponentID();
+    textureSystem->Register(block->material);
+    blockRegister[static_cast<blockType>(block->cID)] = *block;
     return true;
+}
+
+bool BlockManager::Unregister(Component *b){
+    Block* block = dynamic_cast<Block*>(b);
+    textureSystem->Unregister(block->material);
+    blockRegister.erase(block->cID);
+    return true;
+}
+
+bool BlockManager::Place(PlacedBlock* block){
+    if (Verify(block)) {
+        block->cID = Madd::GetInstance().GetNewComponentID();
+        RenderedComponent* r = new RenderedComponent{};
+        r->mesh = blockMesh;
+        r->shade = glm::vec4(1.f);
+        r->texture = blockRegister[block->type].material;
+        r->shader = blockShader;
+        r->model = glm::mat4(1.f);
+        placedBlockRenderedComponent[block->cID] = r;
+        placedBlocks[block->position] = *block;
+        return true;
+    }
+    return false;
+}
+
+blockType BlockManager::GetBlockType(std::string name) {
+    if(nameIDMap.contains(name)){
+        return nameIDMap[name];
+    }else{
+        return static_cast<blockType>(-1);
+    }
+}
+
+std::string BlockManager::GetBlockName(blockType id) {
+    if(blockRegister.contains(id)){
+        return blockRegister[id].name;
+    }else{
+        return "No Such Block";
+    }
+}
+
+bool BlockManager::VerifyBlockInRegister(blockType id) {
+    return blockRegister.contains(id);
+}
+
+bool BlockManager::VerifyBlockUniquePosition(glm::vec3 position) {
+    return !placedBlocks.contains(position);
 }
 
 bool BlockManager::Verify(PlacedBlock* block) {
-    return VerifyBlockInRegister(block->id) && VerifyBlockUniquePosition(block);
+    return VerifyBlockInRegister(block->type) && VerifyBlockUniquePosition(block->position);
 }
 
-bool BlockManager::Place(PlacedBlock *block) {
-    if (Verify(block)) {
-        placedBlocks.push_back(*block);
-        return true;
-    } else {
-        return false;
-    }
-}
 
-bool BlockManager::Place(std::vector<PlacedBlock> blockVector) {
-    for(auto block : blockVector) {
-        if (Verify(&block)) {
-            placedBlocks.push_back(block);
-        } else {
-            return false;
-        }
-    }
-    return true;
-}
-
-// Madd Functions
-
-bool BlockManager::Render() {
-    int i = 0;
-    for(auto const block : placedBlocks) {
-        Block blockObj = GetBlock(block.id);
-        if (blockObj.rendered) {
-            cubeMesh->SetTexture(textureMap[block.id]);
-        }
-        cubeMesh->Rendered(blockObj.rendered);
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, block.position);
-        cubeMesh->SetTransformation(model);
-        if(!cubeMesh->Render())
-            return false;
-        i++;
-    }
-    return true;
-}
-
-bool BlockManager::ReloadShaders(){
-    cubeMesh->LoadShader();
-    return true;
-}
-
-bool BlockManager::Update(){
-    //glm::mat4 trans = cubeMesh->GetTransformation();
-    //cubeMesh->SetTransformation(glm::rotate(trans, glm::clamp(context->GetTime(), -1.f, 1.f)/100.f, glm::vec3(1.0, -1.0, 1.0)));
-    return true;
+void BlockManager::Update(){
 }

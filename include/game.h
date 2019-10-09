@@ -3,6 +3,7 @@
 #include "madd.h"
 #include "blockmanager.h"
 #include "generator.h"
+#include "gamecamera.h"
 
 class Game{
     public:
@@ -10,11 +11,10 @@ class Game{
         ~Game();
         void Run();
     private:
-        Madd* Engine;
-        BlockManager* Manager;
-        Generator* Gen;
         void LoadLobby();
         std::vector<PlacedBlock> Build(glm::vec3 startingCorner, glm::vec3 endingCorner, unsigned blockID);
+        GameCamera* camera;
+        BlockManager* Manager;
 };
 
 #endif //GAME_H

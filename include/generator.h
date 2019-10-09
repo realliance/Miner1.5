@@ -5,20 +5,26 @@
 
 #include <random>
 #include <vector>
+#include <systems/system.h>
+#include "blockdistribution.h"
+#include "madd.h"
 
-class Generator {
+class Generator: public System {
     public:
-        Generator(BlockManager* ma);
-        void RegisterBlock(unsigned blockID, int weight);
+        void Init();
+        void Deinit();
+        bool Register(Component* component);
+        bool Unregister(Component* component);
+        void Update();
+        std::string Name() { return "Generator"; }
         void GenerateAfterMined(glm::vec3 positionMined);
     private:
         std::random_device rd;
         std::mt19937 eng;
-        Madd* Engine;
         BlockManager* Manager;
-        std::vector<std::pair<unsigned, int>> registeredBlocks;
-        unsigned GetRandomRegisteredBlockID();
-        int SumOfRegistered();
+        std::map<ComponentID, BlockDistribution> registeredBlocks;
+        blockType GetRandomRegisteredBlockID();
+        size_t SumOfRegistered;
 };
 
 #endif //GENERATOR_H

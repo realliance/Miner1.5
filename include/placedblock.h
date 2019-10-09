@@ -1,12 +1,10 @@
-#ifndef PLACEDBLOCK_H
-#define PLACEDBLOCK_H
+#pragma once
 
+#include "components/component.h"
+#include <sys/types.h>
 #include <glm/glm.hpp>
-
-struct PlacedBlock {
-        PlacedBlock(unsigned id, glm::vec3 position):id(id),position(position){}
-        unsigned id;
-        glm::vec3 position;
+typedef size_t blockType;
+struct PlacedBlock: public Component {
+    glm::vec3 position;
+    blockType type;
 };
-
-#endif //PLACEDBLOCK_H

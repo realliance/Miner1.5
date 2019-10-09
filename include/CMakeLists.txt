@@ -8,5 +8,7 @@ target_sources(miner1.5
         "${DIR}/blockmanager.h"
         "${DIR}/gamecamera.h"
         "${DIR}/generator.h"
+        "${DIR}/systems.h"
+        "${DIR}/blockdistribution.h"
 )
 target_include_directories(miner1.5 PRIVATE "${miner1.5_SOURCE_DIR}/include")

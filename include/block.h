@@ -1,13 +1,11 @@
-#ifndef BLOCK_H
-#define BLOCK_H
+#pragma once
+
+#include <components/component.h>
+#include <components/texturecomponent.h>
+#include <sys/types.h>
 #include <string>
 
-struct Block {
-        Block(std::string n, std::string mP, bool ren):name(n),materialPath(mP),rendered(ren){}
-        std::string name;
-        std::string materialPath;
-        bool rendered;
-        int id;
+struct Block : public Component{
+    std::string name;
+    TextureComponent* material;
 };
-
-#endif //BLOCK_H

@@ -1,24 +1,19 @@
-#ifndef GAMECAMERA_H
-#define GAMECAMERA_H
-#include "gameobject.h"
-#include "renderedobject.h"
+#pragma once
 #include <glm/glm.hpp>
-class Camera;
+#include <assets/freecamcomponent.h>
+#include <components/keyboardeventcomponent.h>
+#include <components/mouseeventcomponent.h>
 class Madd;
-class GameCamera : public GameObject{
-    public:
-        GameCamera(Madd* context);
-        ~GameCamera();
-        Madd* GetContext(){return context;};
-        bool Render();
-        bool Update();
-        bool ReloadShaders();
-        void ProcessInput(int key, int action);
-    private:
-        Camera* cameraObj;
-        RenderedObject* cubeMesh;
-        Madd* context;
-        glm::vec3 position;
+class GameCamera{
+public:
+  GameCamera();
+  void Unregister();
+  static void HandleEvent(Component* c, WindowComponent* window, int key, int action);
+  FreecamComponent camera;
+private:
+  KeyboardEventComponent mouselockEvent;
+  MouseEventComponent mouseMovementEvent;
+  KeyboardEventComponent keyboardMovementEvent[6];
+  
 };
 
-#endif //GAMECAMERA_H

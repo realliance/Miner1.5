@@ -9,46 +9,58 @@
 #include <time.h>
 #include <iostream>
 
-Generator::Generator(BlockManager* man) {
-    Manager = man;
+void Generator::Init() {
+    Manager = dynamic_cast<BlockManager*>(Madd::GetInstance().GetSystem("BlockManager"));;
     eng = std::mt19937(rd() * time(NULL));
 }
 
-void Generator::RegisterBlock(unsigned blockID, int weight) {
-    registeredBlocks.push_back(std::make_pair(blockID, weight));
+void Generator::Deinit(){
+    SumOfRegistered = 0;
+    registeredBlocks.clear();
 }
 
-int Generator::SumOfRegistered() {
-    int i = 0;
-    for(auto const blockPair : registeredBlocks) {
-        i += std::get<1>(blockPair);
+bool Generator::Register(Component* component) {
+    BlockDistribution* b = dynamic_cast<BlockDistribution*>(component);
+    b->cID = Madd::GetInstance().GetNewComponentID();
+    registeredBlocks[b->cID] = *b;
+    SumOfRegistered += b->weight;
+    return true;
+}
+
+bool Generator::Unregister(Component* component) {
+    if(registeredBlocks.contains(component->cID)){
+        SumOfRegistered -= registeredBlocks[component->cID].weight;
+        registeredBlocks.erase(component->cID);
+        return true;
     }
-    return i;
+    return false;
 }
 
-unsigned Generator::GetRandomRegisteredBlockID() {
-    std::uniform_real_distribution<double> dist(1, SumOfRegistered());
+blockType Generator::GetRandomRegisteredBlockID() {
+    std::uniform_real_distribution<float> dist(1, SumOfRegistered);
     int randomWeight = (int)std::round(dist(eng));
-    std::pair<unsigned, int> chosenPair;
-    for(auto const blockPair : registeredBlocks) {
-        std::cout << randomWeight << " > ";
-        randomWeight -= std::get<1>(blockPair);
-        if (randomWeight <= 0) {
-            chosenPair = blockPair;
-            break;
+    for(auto & [cID, distrib] : registeredBlocks){
+        randomWeight -= distrib.weight;
+        if(randomWeight <= 0){
+            return distrib.type;
         }
     }
-    std::cout << randomWeight << '\n';
-    return std::get<0>(chosenPair);
+    return static_cast<blockType>(-1);
 }
 
 void Generator::GenerateAfterMined(glm::vec3 positionMined) {
-    Manager->Place(new PlacedBlock( GetRandomRegisteredBlockID(), positionMined + glm::vec3(1.0f, 0.0f, 0.0f) ));
-    Manager->Place(new PlacedBlock( GetRandomRegisteredBlockID(), positionMined + glm::vec3(-1.0f, 0.0f, 0.0f) ));
+    std::vector<glm::vec3> positions = {
+        {1.0f, 0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f},
+        {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, -1.0f}
+    };
+    for(glm::vec3 & offset : positions){
+        PlacedBlock b{};
+        b.position = positionMined+offset;
+        b.type = GetRandomRegisteredBlockID();
+        Manager->Place(&b);
+    }
+}
 
-    Manager->Place(new PlacedBlock( GetRandomRegisteredBlockID(), positionMined + glm::vec3(0.0f, 1.0f, 0.0f) ));
-    Manager->Place(new PlacedBlock( GetRandomRegisteredBlockID(), positionMined + glm::vec3(0.0f, -1.0f, 0.0f) ));
+void Generator::Update(){
 
-    Manager->Place(new PlacedBlock( GetRandomRegisteredBlockID(), positionMined + glm::vec3(0.0f, 0.0f, 1.0f) ));
-    Manager->Place(new PlacedBlock( GetRandomRegisteredBlockID(), positionMined + glm::vec3(0.0f, 0.0f, -1.0f) ));
 }

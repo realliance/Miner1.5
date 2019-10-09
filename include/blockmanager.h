@@ -1,38 +1,52 @@
 #ifndef BLOCKMANAGER_H
 #define BLOCKMANAGER_H
-#include "gameobject.h"
-#include "renderedobject.h"
+#include <components/meshcomponent.h>
+#include <components/texturecomponent.h>
+#include <components/shadercomponent.h>
+#include <components/renderedcomponent.h>
 #include "placedblock.h"
 #include "block.h"
 #include <vector>
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 #include <unordered_map>
+#include <systems/texturesystem.h>
+#include <systems/rendersystem.h>
+#include <systems/meshsystem.h>
+#include <systems/shadersystem.h>
+#include <systems/system.h>
 
-class Madd;
-class BlockManager : public GameObject{
+
+
+class BlockManager: public System{
     public:
-        BlockManager(Madd* context);
-        ~BlockManager();
-        Madd* GetContext(){return context;};
-        unsigned Register(Block *block);
-        bool Render();
-        bool Update();
-        bool ReloadShaders();
-        Block GetBlock(std::string name);
-        Block GetBlock(unsigned id);
-        bool Place(PlacedBlock *block);
-        bool Place(std::vector<PlacedBlock> blockVector);
+        void Init();
+        void Deinit();;
+        bool Register(Component* component);
+        bool Unregister(Component* component);
+        void Update();
+        std::string Name() { return "BlockManager"; }
+        
+        blockType GetBlockType(std::string name);
+        std::string GetBlockName(blockType id);
+        bool Place(PlacedBlock* block);
     private:
-        RenderedObject* cubeMesh;
-        std::vector<PlacedBlock> placedBlocks;
-        std::vector<Block> blocks;
-        std::vector<float> vertices;
-        Madd* context;
-        bool Verify(PlacedBlock *block);
-        bool VerifyBlockInRegister(int id);
-        bool VerifyBlockUniquePosition(PlacedBlock *block);
-        std::unordered_map<unsigned, int> textureMap;
+        MeshComponent* blockMesh;
+        ShaderComponent* blockShader;
+        std::map<blockType, Block> blockRegister;
+        std::map<std::string, blockType> nameIDMap;
 
+        std::unordered_map<glm::vec3,PlacedBlock> placedBlocks;
+        std::map<ComponentID, RenderedComponent*> placedBlockRenderedComponent;
+
+        bool Verify(PlacedBlock *block);
+        bool VerifyBlockInRegister(blockType id);
+        bool VerifyBlockUniquePosition(glm::vec3 position);
+
+        TextureSystem* textureSystem;
+        RenderSystem* renderSystem;
+        MeshSystem* meshSystem;
+        ShaderSystem* shaderSystem;
 };
 
 #endif //BLOCKMANAGER_H

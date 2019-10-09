@@ -1,5 +1,4 @@
 #include "game.h"
-#include "gameobject.h"
 #include "gamecamera.h"
 
 #include "blockmanager.h"
@@ -11,56 +10,72 @@
 #include <cmath>
 #include "math.h"
 
+#include "systems.h"
+
 Game::Game(){
-    const char *title = "Miner1.5";
-    Engine = new Madd(1240, 698, title);
-    GameObject* gameCamera = new GameCamera(Engine);
-    Engine->AddObject(gameCamera);
+    Madd::GetInstance().Init();
+  
+    Madd::GetInstance().Register({
+        new GlfwSystem,&RenderSystem::GetInstance(),new TextureSystem,
+        new ShaderSystem, new MeshSystem, &MouseEventSystem::GetInstance(),
+        &KeyboardEventSystem::GetInstance(), new CameraSystem, 
+        new FreeCamSystem, new BlockManager,new Generator
+    });
+
+    Madd::GetInstance().InitSystems();
+
+
+    camera = new GameCamera();
+    WindowComponent mainWindow{};
+    mainWindow.height = 1240;
+    mainWindow.width = 698;
+    mainWindow.title = "Miner1.5";
+    mainWindow.cameras.push_back(&camera->camera.camera);
+    Madd::GetInstance().GetSystem("GlfwSystem")->Register(&mainWindow);
 
     //Init Blocks
-    Manager = new BlockManager(Engine);
-    Manager->Register(new Block("Air", "", false));\
-    Manager->Register(new Block("Lobby Stone", "lobbystone.jpg", true));
-
-    unsigned stoneID = Manager->Register(new Block("Stone", "stone.jpg", true));
-    unsigned ironID = Manager->Register(new Block("Iron", "ironore.jpg", true));
-    unsigned copperID = Manager->Register(new Block("Copper", "copperore.jpg", true));
-    unsigned tinID = Manager->Register(new Block("Tin", "tinore.jpg", true));
-    unsigned goldID = Manager->Register(new Block("Gold", "goldore.jpg", true));
-    unsigned amethystID = Manager->Register(new Block("Amethyst", "amethystore.jpg", true));
-    unsigned quartzID = Manager->Register(new Block("Quartz", "quartzore.jpg", true));
-    unsigned meteorironID = Manager->Register(new Block("Meteoric Iron", "meteorironore.jpg", true));
-    unsigned uraniumID = Manager->Register(new Block("Uranium", "uraniumore.jpg", true));
-
-    //Register Ores and Stone for Random Gen
-    Gen = new Generator(Manager);
-    Gen->RegisterBlock(stoneID, 20);
-
-    Gen->RegisterBlock(ironID, 8);
-    Gen->RegisterBlock(copperID, 8);
-    Gen->RegisterBlock(tinID, 8);
-
-    Gen->RegisterBlock(goldID, 5);
-    Gen->RegisterBlock(amethystID, 5);
-    Gen->RegisterBlock(quartzID, 5);
-
-    Gen->RegisterBlock(meteorironID, 4);
-
-    Gen->RegisterBlock(uraniumID, 3);
-
-    Engine->AddObject(Manager);
+    Manager = dynamic_cast<BlockManager*>(Madd::GetInstance().GetSystem("BlockManager"));
+    Generator* Gen = dynamic_cast<Generator*>(Madd::GetInstance().GetSystem("Generator"));
+    std::vector<std::tuple<std::string, std::string, int>> blocks = {
+        {"Stone",           "stone.jpg",           20},
+        {"Iron",            "ironore.jpg",          8},
+        {"Copper",          "copperore.jpg",        8},
+        {"Tin",             "tinore.jpg",           8},
+        {"Gold",            "goldore.jpg",          5},
+        {"Amethyst",        "amethystore.jpg",      5},
+        {"Quartz",          "quartzore.jpg",        5},
+        {"Meteoric Iron",   "meteorironore.jpg",    4},
+        {"Uranium",         "uraniumore.jpg",       3}
+    };
+    {
+        Block b{};
+        b.name = "Lobby Stone";
+        b.material = new TextureComponent{};
+        b.material->filename = "lobbystone.jpg";
+        Manager->Register(&b);
+    }
+    for(auto & [name, texture, weight] : blocks){
+        Block b{};
+        b.name = name;
+        b.material = new TextureComponent{};
+        b.material->filename = texture;
+        Manager->Register(&b);
+        BlockDistribution d{};
+        d.type = Manager->GetBlockType(b.name);
+        d.weight = weight;
+        Gen->Register(&d);
+    }
 
     LoadLobby();
 }
 
 Game::~Game(){
-    delete Engine;
+    Madd::GetInstance().Deinit();
+    delete camera;
 }
 
 void Game::Run(){
-    while(Engine->StayOpen()){
-        Engine->Tick();
-    }
+    Madd::GetInstance().Run();
 }
 
 std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingCorner, unsigned blockID) {
@@ -73,7 +88,10 @@ std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingC
     for (int x = startingCorner.x; x <= endingCorner.x; x += xDirection) {
         for (int z = startingCorner.z; z <= endingCorner.z; z += zDirection) {
             for (int y = startingCorner.y; y <= endingCorner.y; y += yDirection) {
-                roof.push_back({blockID, glm::vec3((float)x, (float)y, (float)z)});
+                PlacedBlock p{};
+                p.position = glm::vec3((float)x, (float)y, (float)z);
+                p.type = blockID;
+                roof.push_back(p);
             }
         }
     }
@@ -81,35 +99,57 @@ std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingC
 }
 
 void Game::LoadLobby() {
-    unsigned airID = Manager->GetBlock("Air").id;
-    unsigned stoneID = Manager->GetBlock("Stone").id;
-    unsigned lobbyStoneID = Manager->GetBlock("Lobby Stone").id;
+    unsigned airID = Manager->GetBlockType("Air");
+    unsigned stoneID = Manager->GetBlockType("Stone");
+    unsigned lobbyStoneID = Manager->GetBlockType("Lobby Stone");
 
     // Roof
-    Manager->Place(Build(glm::vec3(-5.0f, 2.0f, -5.0f), glm::vec3(5.0f, 2.0f, 5.0f), stoneID));
+    for(auto & block : Build(glm::vec3(-5.0f, 2.0f, -5.0f), glm::vec3(5.0f, 2.0f, 5.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
     // Floor with Lobby Center
-    Manager->Place(Build(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-2.0f, 0.0f, 5.0f), stoneID));
+    for(auto & block : Build(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-2.0f, 0.0f, 5.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
-    Manager->Place(Build(glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -2.0f), stoneID));
-    Manager->Place(Build(glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, 1.0f), lobbyStoneID));
-    Manager->Place(Build(glm::vec3(-1.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 5.0f), stoneID));
+    for(auto & block : Build(glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -2.0f), stoneID)){
+        Manager->Place(&block);
+    }
+    for(auto & block : Build(glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, 1.0f), lobbyStoneID)){
+        Manager->Place(&block);
+    }
+    for(auto & block : Build(glm::vec3(-1.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 5.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
 
-    Manager->Place(Build(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, 5.0f), stoneID));
+    for(auto & block : Build(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, 5.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
     // Front Wall
-    Manager->Place(Build(glm::vec3(-5.0f, 1.0f, -6.0f), glm::vec3(5.0f, 1.0f, -6.0f), stoneID));
+    for(auto & block : Build(glm::vec3(-5.0f, 1.0f, -6.0f), glm::vec3(5.0f, 1.0f, -6.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
     // Back Wall
-    Manager->Place(Build(glm::vec3(-5.0f, 1.0f, 6.0f), glm::vec3(5.0f, 1.0f, 6.0f), stoneID));
+    for(auto & block : Build(glm::vec3(-5.0f, 1.0f, 6.0f), glm::vec3(5.0f, 1.0f, 6.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
     // Left Wall
-    Manager->Place(Build(glm::vec3(-6.0f, 1.0f, -5.0f), glm::vec3(-6.0f, 1.0f, 5.0f), stoneID));
+    for(auto & block : Build(glm::vec3(-6.0f, 1.0f, -5.0f), glm::vec3(-6.0f, 1.0f, 5.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
     // Right Wall
-    Manager->Place(Build(glm::vec3(6.0f, 1.0f, -5.0f), glm::vec3(6.0f, 1.0f, 5.0f), stoneID));
+    for(auto & block : Build(glm::vec3(6.0f, 1.0f, -5.0f), glm::vec3(6.0f, 1.0f, 5.0f), stoneID)){
+        Manager->Place(&block);
+    }
 
     // Fill Room With Air
-    Manager->Place(Build(glm::vec3(-5.0f, 1.0f, -5.0f), glm::vec3(5.0f, 1.0f, 5.0f), airID));
+    for(auto & block : Build(glm::vec3(-5.0f, 1.0f, -5.0f), glm::vec3(5.0f, 1.0f, 5.0f), airID)){
+        Manager->Place(&block);
+    }
 }
