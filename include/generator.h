@@ -17,6 +17,7 @@ class Generator: public System {
         bool Unregister(Component* component);
         void Update();
         std::string Name() { return "Generator"; }
+        std::vector<std::string> Requires() {return {};}
         void GenerateAfterMined(glm::vec3 positionMined);
     private:
         std::random_device rd;

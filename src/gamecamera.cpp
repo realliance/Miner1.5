@@ -33,6 +33,8 @@ GameCamera::GameCamera() {
     KeyboardEventSystem::GetInstance().Register(&keyboardMovementEvent[i]);
   }
   Madd::GetInstance().GetSystem("FreeCamSystem")->Register(&camera);
+  camera.camera.pos = {0.f,1.f,0.f};
+  camera.camera.update = true;
 }
 
 void GameCamera::HandleEvent(Component* _c, WindowComponent* window, int key, int action){
