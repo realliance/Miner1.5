@@ -12,9 +12,10 @@ class Game{
         void Run();
     private:
         void LoadLobby();
-        std::vector<PlacedBlock> Build(glm::vec3 startingCorner, glm::vec3 endingCorner, unsigned blockID);
+        std::vector<PlacedBlock> Build(glm::vec3 startingCorner, glm::vec3 endingCorner, blockType blockID);
         GameCamera* camera;
         BlockManager* Manager;
+        WindowComponent* window;
 };
 
 #endif //GAME_H

@@ -26,6 +26,7 @@ class BlockManager: public System{
         bool Unregister(Component* component);
         void Update();
         std::string Name() { return "BlockManager"; }
+        std::vector<std::string> Requires() { return {"MeshSystem","ShaderSystem"};}
         
         blockType GetBlockType(std::string name);
         std::string GetBlockName(blockType id);
@@ -42,6 +43,8 @@ class BlockManager: public System{
         bool Verify(PlacedBlock *block);
         bool VerifyBlockInRegister(blockType id);
         bool VerifyBlockUniquePosition(glm::vec3 position);
+
+        blockType airType;
 
         TextureSystem* textureSystem;
         RenderSystem* renderSystem;

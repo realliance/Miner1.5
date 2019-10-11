@@ -25,13 +25,13 @@ Game::Game(){
     Madd::GetInstance().InitSystems();
 
 
-    camera = new GameCamera();
-    WindowComponent mainWindow{};
-    mainWindow.height = 1240;
-    mainWindow.width = 698;
-    mainWindow.title = "Miner1.5";
-    mainWindow.cameras.push_back(&camera->camera.camera);
-    Madd::GetInstance().GetSystem("GlfwSystem")->Register(&mainWindow);
+    camera = new GameCamera{};
+    window = new WindowComponent{};
+    window->height = 698;
+    window->width = 1240;
+    window->title = "Miner1.5";
+    window->cameras.push_back(&camera->camera.camera);
+    Madd::GetInstance().GetSystem("GlfwSystem")->Register(window);
 
     //Init Blocks
     Manager = dynamic_cast<BlockManager*>(Madd::GetInstance().GetSystem("BlockManager"));
@@ -78,7 +78,7 @@ void Game::Run(){
     Madd::GetInstance().Run();
 }
 
-std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingCorner, unsigned blockID) {
+std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingCorner, blockType blockID) {
 
     int xDirection = copysign(1.0f, endingCorner.x - startingCorner.x);
     int yDirection = copysign(1.0f, endingCorner.y - startingCorner.y);
@@ -99,9 +99,9 @@ std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingC
 }
 
 void Game::LoadLobby() {
-    unsigned airID = Manager->GetBlockType("Air");
-    unsigned stoneID = Manager->GetBlockType("Stone");
-    unsigned lobbyStoneID = Manager->GetBlockType("Lobby Stone");
+    blockType airID = Manager->GetBlockType("Air");
+    blockType stoneID = Manager->GetBlockType("Stone");
+    blockType lobbyStoneID = Manager->GetBlockType("Lobby Stone");
 
     // Roof
     for(auto & block : Build(glm::vec3(-5.0f, 2.0f, -5.0f), glm::vec3(5.0f, 2.0f, 5.0f), stoneID)){
