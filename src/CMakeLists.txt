@@ -4,7 +4,8 @@ target_sources(miner1.5
         "${DIR}/game.cpp"
         "${DIR}/main.cpp"
         "${DIR}/gamecamera.cpp"
-        "${DIR}/blockmanager.cpp"
+        "${DIR}/blockregistrysystem.cpp"
+        "${DIR}/blockplacesystem.cpp"
         "${DIR}/generator.cpp"
 )
 target_include_directories(miner1.5 PRIVATE "${miner1.5_SOURCE_DIR}/include")

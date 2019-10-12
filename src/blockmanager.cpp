@@ -57,8 +57,8 @@ void BlockManager::Init(){
     air.name = "Air";
     air.cID = Madd::GetInstance().GetNewComponentID();
     airType = air.cID;
-    blockRegister[static_cast<blockType>(air.cID)] = air;
-    nameIDMap[air.name] = static_cast<blockType>(air.cID);
+    blockRegister[static_cast<BlockType>(air.cID)] = air;
+    nameIDMap[air.name] = static_cast<BlockType>(air.cID);
 }
 
 void BlockManager::Deinit(){
@@ -84,8 +84,8 @@ bool BlockManager::Register(Component *b){
     Block* block = dynamic_cast<Block*>(b);
     block->cID = Madd::GetInstance().GetNewComponentID();
     textureSystem->Register(block->material);
-    blockRegister[static_cast<blockType>(block->cID)] = *block;
-    nameIDMap[block->name] = static_cast<blockType>(block->cID);
+    blockRegister[static_cast<BlockType>(block->cID)] = *block;
+    nameIDMap[block->name] = static_cast<BlockType>(block->cID);
     return true;
 }
 
@@ -95,7 +95,7 @@ bool BlockManager::Unregister(Component *b){
     blockRegister.erase(block->cID);
     return true;
 }
-#include <glm/gtx/string_cast.hpp>
+
 bool BlockManager::Place(PlacedBlock* block){
     if (Verify(block)) {
         block->cID = Madd::GetInstance().GetNewComponentID();
@@ -116,15 +116,15 @@ bool BlockManager::Place(PlacedBlock* block){
     return false;
 }
 
-blockType BlockManager::GetBlockType(std::string name) {
+BlockType BlockManager::GetBlockType(std::string name) {
     if(nameIDMap.contains(name)){
         return nameIDMap[name];
     }else{
-        return static_cast<blockType>(-1);
+        return static_cast<BlockType>(-1);
     }
 }
 
-std::string BlockManager::GetBlockName(blockType id) {
+std::string BlockManager::GetBlockName(BlockType id) {
     if(blockRegister.contains(id)){
         return blockRegister[id].name;
     }else{
@@ -132,7 +132,7 @@ std::string BlockManager::GetBlockName(blockType id) {
     }
 }
 
-bool BlockManager::VerifyBlockInRegister(blockType id) {
+bool BlockManager::VerifyBlockInRegister(BlockType id) {
     return blockRegister.contains(id);
 }
 

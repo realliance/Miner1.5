@@ -28,23 +28,23 @@ class BlockManager: public System{
         std::string Name() { return "BlockManager"; }
         std::vector<std::string> Requires() { return {"MeshSystem","ShaderSystem"};}
         
-        blockType GetBlockType(std::string name);
-        std::string GetBlockName(blockType id);
+        BlockType GetBlockType(std::string name);
+        std::string GetBlockName(BlockType id);
         bool Place(PlacedBlock* block);
     private:
         MeshComponent* blockMesh;
         ShaderComponent* blockShader;
-        std::map<blockType, Block> blockRegister;
-        std::map<std::string, blockType> nameIDMap;
+        std::map<BlockType, Block> blockRegister;
+        std::map<std::string, BlockType> nameIDMap;
 
         std::unordered_map<glm::vec3,PlacedBlock> placedBlocks;
         std::map<ComponentID, RenderedComponent*> placedBlockRenderedComponent;
 
         bool Verify(PlacedBlock *block);
-        bool VerifyBlockInRegister(blockType id);
+        bool VerifyBlockInRegister(BlockType id);
         bool VerifyBlockUniquePosition(glm::vec3 position);
 
-        blockType airType;
+        BlockType airType;
 
         TextureSystem* textureSystem;
         RenderSystem* renderSystem;

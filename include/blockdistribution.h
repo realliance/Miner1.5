@@ -5,7 +5,7 @@
 #include <sys/types.h>
 
 struct BlockDistribution : public Component{
-  blockType type;
+  BlockType type;
   int weight;
 };
 

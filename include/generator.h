@@ -1,7 +1,7 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 #include "block.h"
-#include "blockmanager.h"
+#include "blockplacesystem.h"
 
 #include <random>
 #include <vector>
@@ -22,9 +22,9 @@ class Generator: public System {
     private:
         std::random_device rd;
         std::mt19937 eng;
-        BlockManager* Manager;
+        BlockPlaceSystem* Manager;
         std::map<ComponentID, BlockDistribution> registeredBlocks;
-        blockType GetRandomRegisteredBlockID();
+        BlockType GetRandomRegisteredBlockID();
         size_t SumOfRegistered;
 };
 

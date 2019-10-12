@@ -1,5 +1,5 @@
 #include "block.h"
-#include "blockmanager.h"
+#include "blockplacesystem.h"
 #include "placedblock.h"
 
 #include "generator.h"
@@ -10,7 +10,7 @@
 #include <iostream>
 
 void Generator::Init() {
-    Manager = dynamic_cast<BlockManager*>(Madd::GetInstance().GetSystem("BlockManager"));;
+    Manager = dynamic_cast<BlockPlaceSystem*>(Madd::GetInstance().GetSystem("BlockPlaceSystem"));;
     eng = std::mt19937(rd() * time(NULL));
 }
 
@@ -36,7 +36,7 @@ bool Generator::Unregister(Component* component) {
     return false;
 }
 
-blockType Generator::GetRandomRegisteredBlockID() {
+BlockType Generator::GetRandomRegisteredBlockID() {
     std::uniform_real_distribution<float> dist(1, SumOfRegistered);
     int randomWeight = (int)std::round(dist(eng));
     for(auto & [cID, distrib] : registeredBlocks){
@@ -45,7 +45,7 @@ blockType Generator::GetRandomRegisteredBlockID() {
             return distrib.type;
         }
     }
-    return static_cast<blockType>(-1);
+    return static_cast<BlockType>(-1);
 }
 
 void Generator::GenerateAfterMined(glm::vec3 positionMined) {

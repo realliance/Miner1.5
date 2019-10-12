@@ -1,8 +1,9 @@
 #include "game.h"
 #include "gamecamera.h"
 
-#include "blockmanager.h"
 #include "block.h"
+#include "blockregistrysystem.h"
+#include "blockplacesystem.h"
 
 #include "generator.h"
 
@@ -19,7 +20,7 @@ Game::Game(){
         new GlfwSystem,&RenderSystem::GetInstance(),new TextureSystem,
         new ShaderSystem, new MeshSystem, &MouseEventSystem::GetInstance(),
         &KeyboardEventSystem::GetInstance(), new CameraSystem, 
-        new FreeCamSystem, new BlockManager,new Generator
+        new FreeCamSystem, new BlockRegistrySystem, new BlockPlaceSystem, new Generator
     });
 
     Madd::GetInstance().InitSystems();
@@ -34,8 +35,11 @@ Game::Game(){
     Madd::GetInstance().GetSystem("GlfwSystem")->Register(window);
 
     //Init Blocks
-    Manager = dynamic_cast<BlockManager*>(Madd::GetInstance().GetSystem("BlockManager"));
+    blockRegistry = dynamic_cast<BlockRegistrySystem*>(Madd::GetInstance().GetSystem("BlockRegistrySystem"));
+    blockPlace = dynamic_cast<BlockPlaceSystem*>(Madd::GetInstance().GetSystem("BlockPlaceSystem"));
     Generator* Gen = dynamic_cast<Generator*>(Madd::GetInstance().GetSystem("Generator"));
+
+    // {Name, filepath in assets, weight of spawning}
     std::vector<std::tuple<std::string, std::string, int>> blocks = {
         {"Stone",           "stone.jpg",           20},
         {"Iron",            "ironore.jpg",          8},
@@ -52,16 +56,16 @@ Game::Game(){
         b.name = "Lobby Stone";
         b.material = new TextureComponent{};
         b.material->filename = "lobbystone.jpg";
-        Manager->Register(&b);
+        blockRegistry->Register(&b);
     }
-    for(auto & [name, texture, weight] : blocks){
+    for(auto const & [name, texture, weight] : blocks){
         Block b{};
         b.name = name;
         b.material = new TextureComponent{};
         b.material->filename = texture;
-        Manager->Register(&b);
+        blockRegistry->Register(&b);
         BlockDistribution d{};
-        d.type = Manager->GetBlockType(b.name);
+        d.type = blockRegistry->GetBlockType(b.name);
         d.weight = weight;
         Gen->Register(&d);
     }
@@ -78,7 +82,7 @@ void Game::Run(){
     Madd::GetInstance().Run();
 }
 
-std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingCorner, blockType blockID) {
+std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingCorner, BlockType blockID) {
 
     int xDirection = copysign(1.0f, endingCorner.x - startingCorner.x);
     int yDirection = copysign(1.0f, endingCorner.y - startingCorner.y);
@@ -99,57 +103,57 @@ std::vector<PlacedBlock> Game::Build(glm::vec3 startingCorner, glm::vec3 endingC
 }
 
 void Game::LoadLobby() {
-    blockType airID = Manager->GetBlockType("Air");
-    blockType stoneID = Manager->GetBlockType("Stone");
-    blockType lobbyStoneID = Manager->GetBlockType("Lobby Stone");
+    BlockType airID = blockRegistry->GetBlockType("Air");
+    BlockType stoneID = blockRegistry->GetBlockType("Stone");
+    BlockType lobbyStoneID = blockRegistry->GetBlockType("Lobby Stone");
 
     // Roof
     for(auto & block : Build(glm::vec3(-5.0f, 2.0f, -5.0f), glm::vec3(5.0f, 2.0f, 5.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
     // Floor with Lobby Center
     for(auto & block : Build(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-2.0f, 0.0f, 5.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
     for(auto & block : Build(glm::vec3(-1.0f, 0.0f, -5.0f), glm::vec3(1.0f, 0.0f, -2.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
     for(auto & block : Build(glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, 1.0f), lobbyStoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
     for(auto & block : Build(glm::vec3(-1.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 5.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
 
     for(auto & block : Build(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, 5.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
     // Front Wall
     for(auto & block : Build(glm::vec3(-5.0f, 1.0f, -6.0f), glm::vec3(5.0f, 1.0f, -6.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
     // Back Wall
     for(auto & block : Build(glm::vec3(-5.0f, 1.0f, 6.0f), glm::vec3(5.0f, 1.0f, 6.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
     // Left Wall
     for(auto & block : Build(glm::vec3(-6.0f, 1.0f, -5.0f), glm::vec3(-6.0f, 1.0f, 5.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
     // Right Wall
     for(auto & block : Build(glm::vec3(6.0f, 1.0f, -5.0f), glm::vec3(6.0f, 1.0f, 5.0f), stoneID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 
     // Fill Room With Air
     for(auto & block : Build(glm::vec3(-5.0f, 1.0f, -5.0f), glm::vec3(5.0f, 1.0f, 5.0f), airID)){
-        Manager->Place(&block);
+        blockPlace->Place(&block);
     }
 }
